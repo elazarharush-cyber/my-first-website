@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ייעוץ וליווי כלכלי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Heebo', sans-serif;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+        direction: rtl;
+      }
+
+      .logo-emblem {
+        filter: drop-shadow(0 0 12px rgba(168, 237, 234, 0.4));
+        flex-shrink: 0;
+      }
+
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .logo-main {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: white;
+        line-height: 1;
+        letter-spacing: 0.5px;
+      }
+
+      .logo-tagline {
+        font-size: 0.78rem;
+        font-weight: 300;
+        color: #a8edea;
+        letter-spacing: 1.5px;
+      }
+
+      .header p {
+        font-size: 0.9rem;
+        color: #6a8a9e;
+        font-weight: 300;
+        letter-spacing: 0.5px;
+      }
+
+      /* Card */
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 48px 52px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+      }
+
+      .card h2 {
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .card .subtitle {
+        color: #8fafc4;
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+      }
+
+      /* Form */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #a8c0d4;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-family: 'Heebo', sans-serif;
+        font-size: 0.95rem;
+        transition: border-color 0.3s, background 0.3s;
+        outline: none;
+        direction: rtl;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #5a7a90;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #a8edea;
+        background: rgba(168, 237, 234, 0.08);
+      }
+
+      select option {
+        background: #203a43;
+        color: white;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* Validation */
+      .error-msg {
+        color: #ff7b7b;
+        font-size: 0.78rem;
+        margin-top: 5px;
+        display: none;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .error-msg.visible {
+        display: flex;
+      }
+
+      input.invalid,
+      select.invalid,
+      textarea.invalid {
+        border-color: #ff7b7b;
+        background: rgba(255, 123, 123, 0.07);
+      }
+
+      input.valid,
+      select.valid,
+      textarea.valid {
+        border-color: #6edfa0;
+        background: rgba(110, 223, 160, 0.07);
+      }
+
+      label .required-star {
+        color: #ff7b7b;
+        margin-right: 2px;
+      }
+
+      /* Submit button */
+      .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #a8edea, #56a0b5);
+        border: none;
+        border-radius: 12px;
+        color: #0f2027;
+        font-family: 'Heebo', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(168, 237, 234, 0.35);
+      }
+
+      .btn-submit:active {
+        transform: translateY(0);
+      }
+
+      /* Trust badges */
+      .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #7a9ab0;
+        font-size: 0.8rem;
+      }
+
+      .badge span:first-child {
+        font-size: 16px;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 32px;
+        color: #4a6a80;
+        font-size: 0.8rem;
+        text-align: center;
+      }
+
+      @media (max-width: 560px) {
+        .card {
+          padding: 32px 24px;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+        .header h1 {
+          font-size: 1.7rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="header">
+      <!-- Logo -->
+      <div class="logo">
+        <div class="logo-emblem">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="52" height="52" aria-hidden="true">
+            <defs>
+              <linearGradient id="emblemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#a8edea"/>
+                <stop offset="100%" style="stop-color:#56a0b5"/>
+              </linearGradient>
+            </defs>
+            <!-- Hexagon shape -->
+            <polygon points="26,2 48,14 48,38 26,50 4,38 4,14" fill="none" stroke="url(#emblemGrad)" stroke-width="1.5"/>
+            <!-- Rising chart line -->
+            <polyline points="14,36 22,26 30,30 38,16" stroke="url(#emblemGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Arrow tip -->
+            <polyline points="34,13 38,16 35,20" stroke="url(#emblemGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-main">ייעוץ וליווי כלכלי</span>
+          <span class="logo-tagline">תכנון · צמיחה · ביטחון פיננסי</span>
+        </div>
+      </div>
+
+      <p>מומחיות פיננסית · ליווי אישי · תוצאות מוכחות</p>
+    </div>
+
+    <div class="card">
+      <h2>השאירו פרטים ונחזור אליכם</h2>
+      <p class="subtitle">ייעוץ ראשוני ללא עלות · תגובה תוך 24 שעות</p>
+
+      <form id="leadForm" action="#" method="POST" novalidate>
+
+        <div class="form-row">
+          <div>
+            <label for="firstName">שם פרטי <span class="required-star" aria-hidden="true">*</span></label>
+            <input type="text" id="firstName" name="firstName" placeholder="ישראל" autocomplete="given-name" />
+            <div class="error-msg" id="firstNameError" role="alert">⚠ שדה חובה · אותיות בלבד (לפחות 2 תווים)</div>
+          </div>
+          <div>
+            <label for="lastName">שם משפחה <span class="required-star" aria-hidden="true">*</span></label>
+            <input type="text" id="lastName" name="lastName" placeholder="ישראלי" autocomplete="family-name" />
+            <div class="error-msg" id="lastNameError" role="alert">⚠ שדה חובה · אותיות בלבד (לפחות 2 תווים)</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">דואר אלקטרוני</label>
+          <input type="email" id="email" name="email" placeholder="example@email.com" autocomplete="email" />
+          <div class="error-msg" id="emailError" role="alert">⚠ נא להזין כתובת מייל תקינה (לדוגמה: name@domain.com)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">מספר טלפון <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="0501234567" maxlength="10" autocomplete="tel" />
+          <div class="error-msg" id="phoneError" role="alert">⚠ שדה חובה · ספרות בלבד · עד 10 תווים</div>
+        </div>
+
+        <div class="form-group">
+          <label for="service">תחום הייעוץ <span class="required-star" aria-hidden="true">*</span></label>
+          <select id="service" name="service">
+            <option value="">-- במה נוכל לעזור? --</option>
+            <option value="financial-planning">תכנון פיננסי אישי</option>
+            <option value="investment">ייעוץ השקעות</option>
+            <option value="debt">ניהול וסדר חובות</option>
+            <option value="retirement">תכנון פרישה</option>
+            <option value="business">ייעוץ עסקי כלכלי</option>
+          </select>
+          <div class="error-msg" id="serviceError" role="alert">⚠ נא לבחור תחום ייעוץ</div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">ספר לנו בקצרה על המצב שלך</label>
+          <textarea id="message" name="message" placeholder="מה המטרה שלך? במה אתה מתמודד?" maxlength="500"></textarea>
+          <div class="error-msg" id="messageError" role="alert">⚠ ההודעה ארוכה מדי (מקסימום 500 תווים)</div>
+        </div>
+
+        <button type="submit" class="btn-submit">שלח ואקבל ייעוץ ראשוני חינם →</button>
+
+      </form>
+
+      <div class="trust-badges">
+        <div class="badge"><span>🔒</span><span>מידע מאובטח</span></div>
+        <div class="badge"><span>✅</span><span>ייעוץ מקצועי</span></div>
+        <div class="badge"><span>⚡</span><span>מענה מהיר</span></div>
+      </div>
+    </div>
+
+    <div class="footer">© 2025 ייעוץ וליווי כלכלי · כל הזכויות שמורות</div>
+
+    <script>
+      const form = document.getElementById('leadForm');
+
+      // --- Validation rules ---
+      const validators = {
+        firstName: {
+          validate: (v) => /^[\u0590-\u05FFa-zA-Z\s]{2,50}$/.test(v.trim()),
+          errorId: 'firstNameError',
+        },
+        lastName: {
+          validate: (v) => /^[\u0590-\u05FFa-zA-Z\s]{2,50}$/.test(v.trim()),
+          errorId: 'lastNameError',
+        },
+        email: {
+          validate: (v) => v.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+          errorId: 'emailError',
+        },
+        phone: {
+          validate: (v) => /^\d{9,10}$/.test(v.trim()),
+          errorId: 'phoneError',
+        },
+        service: {
+          validate: (v) => v !== '',
+          errorId: 'serviceError',
+        },
+        message: {
+          validate: (v) => v.length <= 500,
+          errorId: 'messageError',
+        },
+      };
+
+      // Mark field valid/invalid
+      function setFieldState(field, isValid) {
+        const errorEl = document.getElementById(validators[field.id]?.errorId);
+        if (isValid) {
+          field.classList.remove('invalid');
+          // Only show green checkmark if field has a value
+          if (field.value.trim() !== '' && field.value !== '') {
+            field.classList.add('valid');
+          } else {
+            field.classList.remove('valid');
+          }
+          if (errorEl) errorEl.classList.remove('visible');
+        } else {
+          field.classList.add('invalid');
+          field.classList.remove('valid');
+          if (errorEl) errorEl.classList.add('visible');
+        }
+      }
+
+      // Validate single field
+      function validateField(field) {
+        const rule = validators[field.id];
+        if (!rule) return true;
+        const isValid = rule.validate(field.value);
+        setFieldState(field, isValid);
+        return isValid;
+      }
+
+      // Phone: allow digits only while typing
+      document.getElementById('phone').addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+      });
+
+      // Real-time validation on blur (when leaving a field)
+      ['firstName', 'lastName', 'email', 'phone', 'service', 'message'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('blur', () => validateField(el));
+        // Clear invalid state while typing after first submit attempt
+        el.addEventListener('input', () => {
+          if (el.classList.contains('invalid')) validateField(el);
+        });
+      });
+
+      // Form submit
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        let allValid = true;
+
+        ['firstName', 'lastName', 'email', 'phone', 'service', 'message'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && !validateField(el)) allValid = false;
+        });
+
+        if (allValid) {
+          const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxzDdWwJ8fxyMc2OjoOza83XQgStg1HyzzRVCdwoXiynXKax5ZxN35cdTAVzXteEFc4Lw/exec';
+
+          const leadData = {
+            id:        Date.now().toString(),
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName:  document.getElementById('lastName').value.trim(),
+            email:     document.getElementById('email').value.trim(),
+            phone:     document.getElementById('phone').value.trim(),
+            service:   document.getElementById('service').value,
+            message:   document.getElementById('message').value.trim(),
+            date:      new Date().toISOString(),
+          };
+
+          // Save to localStorage
+          const leads = JSON.parse(localStorage.getItem('leads') || '[]');
+          leads.push(leadData);
+          localStorage.setItem('leads', JSON.stringify(leads));
+
+          // Update button to loading state
+          const btn = form.querySelector('.btn-submit');
+          btn.textContent = '⏳ שולח...';
+          btn.disabled = true;
+
+          // Send to Google Sheets
+          fetch(SHEET_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(leadData),
+          })
+          .then(() => {
+            btn.textContent = '✅ הטופס נשלח בהצלחה! נחזור אליך בקרוב';
+            btn.style.background = 'linear-gradient(135deg, #6edfa0, #2ecc71)';
+          })
+          .catch(() => {
+            // Saved locally even if Sheets failed
+            btn.textContent = '✅ הטופס נשלח! נחזור אליך בקרוב';
+            btn.style.background = 'linear-gradient(135deg, #6edfa0, #2ecc71)';
+          });
+
+        } else {
+          // Scroll to first invalid field
+          const firstInvalid = form.querySelector('.invalid');
+          if (firstInvalid) firstInvalid.focus();
+        }
+      });
+    </script>
+
+  </body>
+</html>

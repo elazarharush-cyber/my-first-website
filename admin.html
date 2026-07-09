@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>אזור מנהל · לידים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: 'Heebo', sans-serif;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        min-height: 100vh;
+        padding: 32px 20px;
+        color: white;
+      }
+
+      /* Login screen */
+      .login-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        z-index: 100;
+      }
+
+      .login-card {
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 20px;
+        padding: 48px 52px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        text-align: center;
+      }
+
+      .login-card .lock-icon { font-size: 40px; margin-bottom: 16px; }
+
+      .login-card h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .login-card p {
+        color: #8fafc4;
+        font-size: 0.88rem;
+        margin-bottom: 28px;
+      }
+
+      .login-input {
+        width: 100%;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-family: 'Heebo', sans-serif;
+        font-size: 0.95rem;
+        outline: none;
+        direction: rtl;
+        margin-bottom: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .login-input:focus { border-color: #a8edea; }
+      .login-input::placeholder { color: #5a7a90; }
+
+      .login-error {
+        color: #ff7b7b;
+        font-size: 0.82rem;
+        margin-bottom: 12px;
+        display: none;
+      }
+
+      /* Shared button style */
+      .btn {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #a8edea, #56a0b5);
+        border: none;
+        border-radius: 12px;
+        color: #0f2027;
+        font-family: 'Heebo', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(168,237,234,0.3); }
+      .btn-sm {
+        width: auto;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #ff7b7b, #c0392b);
+        color: white;
+      }
+
+      /* Dashboard */
+      .dashboard { display: none; max-width: 1100px; margin: 0 auto; }
+
+      /* Top bar */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .topbar-logo { display: flex; align-items: center; gap: 12px; }
+      .topbar-logo .logo-main { font-size: 1.3rem; font-weight: 700; }
+      .topbar-logo .logo-tagline { font-size: 0.75rem; color: #a8edea; }
+      .topbar-actions { display: flex; gap: 10px; align-items: center; }
+      .topbar-actions span { color: #8fafc4; font-size: 0.85rem; }
+
+      /* Stats */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .stat-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
+        padding: 20px 24px;
+        text-align: center;
+      }
+
+      .stat-card .stat-num {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #a8edea, #56a0b5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-card .stat-label { font-size: 0.8rem; color: #8fafc4; margin-top: 4px; }
+
+      /* Filters */
+      .filters {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .filter-input {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 10px;
+        padding: 9px 14px;
+        color: white;
+        font-family: 'Heebo', sans-serif;
+        font-size: 0.88rem;
+        outline: none;
+        direction: rtl;
+        transition: border-color 0.3s;
+        flex: 1;
+        min-width: 160px;
+      }
+
+      .filter-input:focus { border-color: #a8edea; }
+      .filter-input::placeholder { color: #5a7a90; }
+      .filter-input option { background: #203a43; }
+
+      /* Table */
+      .table-wrap {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        overflow: hidden;
+        overflow-x: auto;
+      }
+
+      table { width: 100%; border-collapse: collapse; min-width: 650px; }
+
+      thead tr {
+        background: rgba(168,237,234,0.08);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      th {
+        padding: 14px 18px;
+        text-align: right;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #a8edea;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      th:hover { color: white; }
+      th .sort-arrow { margin-right: 4px; opacity: 0.5; font-size: 0.7rem; }
+      th.sorted .sort-arrow { opacity: 1; }
+
+      tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        transition: background 0.2s;
+      }
+
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+      td {
+        padding: 14px 18px;
+        font-size: 0.88rem;
+        color: #d0e4f0;
+        vertical-align: top;
+      }
+
+      .td-name { font-weight: 600; color: white; }
+      .td-message { max-width: 200px; color: #8fafc4; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      .service-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: rgba(168,237,234,0.12);
+        color: #a8edea;
+        border: 1px solid rgba(168,237,234,0.2);
+        white-space: nowrap;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #5a7a90;
+      }
+
+      .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .login-card { padding: 32px 24px; }
+        .topbar { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+      <div class="login-card">
+        <div class="lock-icon">🔐</div>
+        <h2>אזור מנהל</h2>
+        <p>הכנס סיסמה להמשך</p>
+        <input type="password" id="passwordInput" class="login-input" placeholder="סיסמה" />
+        <div class="login-error" id="loginError">סיסמה שגויה. נסה שוב.</div>
+        <button class="btn" onclick="doLogin()">כניסה</button>
+        <p style="margin-top:20px; font-size:0.75rem; color:#4a6a80;">סיסמת ברירת מחדל: <strong style="color:#a8edea">admin123</strong></p>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+
+      <div class="topbar">
+        <div class="topbar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="38" height="38" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#a8edea"/>
+                <stop offset="100%" style="stop-color:#56a0b5"/>
+              </linearGradient>
+            </defs>
+            <polygon points="26,2 48,14 48,38 26,50 4,38 4,14" fill="none" stroke="url(#g1)" stroke-width="1.5"/>
+            <polyline points="14,36 22,26 30,30 38,16" stroke="url(#g1)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="34,13 38,16 35,20" stroke="url(#g1)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div>
+            <div class="logo-main">אזור מנהל</div>
+            <div class="logo-tagline">ייעוץ וליווי כלכלי</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-sm" onclick="exportCSV()">⬇ ייצוא CSV</button>
+          <button class="btn btn-sm btn-danger" onclick="clearAllLeads()">🗑 נקה הכל</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;" onclick="logout()">יציאה</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">סה"כ לידים</div></div>
+        <div class="stat-card"><div class="stat-num" id="statToday">0</div><div class="stat-label">נכנסו היום</div></div>
+        <div class="stat-card"><div class="stat-num" id="statWeek">0</div><div class="stat-label">השבוע</div></div>
+        <div class="stat-card"><div class="stat-num" id="statService">-</div><div class="stat-label">שירות מבוקש</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <input type="text" class="filter-input" id="searchInput" placeholder="🔍 חיפוש לפי שם, מייל, טלפון..." oninput="renderTable()" />
+        <select class="filter-input" id="serviceFilter" onchange="renderTable()" style="max-width:200px;">
+          <option value="">כל השירותים</option>
+          <option value="financial-planning">תכנון פיננסי אישי</option>
+          <option value="investment">ייעוץ השקעות</option>
+          <option value="debt">ניהול וסדר חובות</option>
+          <option value="retirement">תכנון פרישה</option>
+          <option value="business">ייעוץ עסקי כלכלי</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('name')" id="th-name">שם <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBy('email')" id="th-email">מייל <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBy('phone')" id="th-phone">טלפון <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBy('service')" id="th-service">שירות <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBy('date')" id="th-date">תאריך <span class="sort-arrow">↕</span></th>
+              <th>הודעה</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <script>
+      const ADMIN_PASS = 'admin123';
+      const STORAGE_KEY = 'leads';
+      let sortField = 'date';
+      let sortDir = -1; // -1 = desc, 1 = asc
+
+      const serviceLabels = {
+        'financial-planning': 'תכנון פיננסי',
+        'investment': 'ייעוץ השקעות',
+        'debt': 'ניהול חובות',
+        'retirement': 'תכנון פרישה',
+        'business': 'ייעוץ עסקי',
+      };
+
+      // --- Auth ---
+      function doLogin() {
+        const val = document.getElementById('passwordInput').value;
+        if (val === ADMIN_PASS) {
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          renderTable();
+          updateStats();
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+          document.getElementById('passwordInput').value = '';
+        }
+      }
+
+      document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doLogin();
+      });
+
+      function logout() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('passwordInput').value = '';
+      }
+
+      // --- Data ---
+      function getLeads() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      }
+
+      function deleteLead(id) {
+        if (!confirm('למחוק ליד זה?')) return;
+        const leads = getLeads().filter(l => l.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+        renderTable();
+        updateStats();
+      }
+
+      function clearAllLeads() {
+        if (!confirm('למחוק את כל הלידים? פעולה זו אינה הפיכה.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        renderTable();
+        updateStats();
+      }
+
+      // --- Stats ---
+      function updateStats() {
+        const leads = getLeads();
+        const now = new Date();
+        const todayStr = now.toDateString();
+        const weekAgo = new Date(now - 7 * 864e5);
+
+        document.getElementById('statTotal').textContent = leads.length;
+        document.getElementById('statToday').textContent = leads.filter(l => new Date(l.date).toDateString() === todayStr).length;
+        document.getElementById('statWeek').textContent = leads.filter(l => new Date(l.date) >= weekAgo).length;
+
+        // Most requested service
+        const counts = {};
+        leads.forEach(l => { if (l.service) counts[l.service] = (counts[l.service] || 0) + 1; });
+        const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+        document.getElementById('statService').textContent = top ? serviceLabels[top[0]] || top[0] : '-';
+      }
+
+      // --- Sort ---
+      function sortBy(field) {
+        if (sortField === field) sortDir *= -1;
+        else { sortField = field; sortDir = -1; }
+        document.querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
+        const thEl = document.getElementById('th-' + field);
+        if (thEl) thEl.classList.add('sorted');
+        renderTable();
+      }
+
+      // --- Render ---
+      function renderTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const serviceFilter = document.getElementById('serviceFilter').value;
+        let leads = getLeads();
+
+        // Filter
+        leads = leads.filter(l => {
+          const fullName = (l.firstName + ' ' + l.lastName).toLowerCase();
+          const matchSearch = !search || fullName.includes(search) || (l.email || '').toLowerCase().includes(search) || (l.phone || '').includes(search);
+          const matchService = !serviceFilter || l.service === serviceFilter;
+          return matchSearch && matchService;
+        });
+
+        // Sort
+        leads.sort((a, b) => {
+          let av, bv;
+          if (sortField === 'name') { av = a.firstName; bv = b.firstName; }
+          else if (sortField === 'date') { av = new Date(a.date); bv = new Date(b.date); }
+          else { av = a[sortField] || ''; bv = b[sortField] || ''; }
+          if (av < bv) return -sortDir;
+          if (av > bv) return sortDir;
+          return 0;
+        });
+
+        const tbody = document.getElementById('leadsTableBody');
+
+        if (leads.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📭</div><div>אין לידים להצגה</div></div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = leads.map(l => {
+          const date = new Date(l.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const service = serviceLabels[l.service] || l.service || '-';
+          return `<tr>
+            <td class="td-name">${esc(l.firstName)} ${esc(l.lastName)}</td>
+            <td>${l.email ? `<a href="mailto:${esc(l.email)}" style="color:#a8edea;text-decoration:none;">${esc(l.email)}</a>` : '-'}</td>
+            <td>${l.phone ? `<a href="tel:${esc(l.phone)}" style="color:#a8edea;text-decoration:none;">${esc(l.phone)}</a>` : '-'}</td>
+            <td><span class="service-badge">${esc(service)}</span></td>
+            <td style="white-space:nowrap;font-size:0.82rem;color:#8fafc4;">${date}</td>
+            <td class="td-message" title="${esc(l.message || '')}">${esc(l.message || '-')}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteLead('${l.id}')">מחק</button></td>
+          </tr>`;
+        }).join('');
+      }
+
+      function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      // --- Export CSV ---
+      function exportCSV() {
+        const leads = getLeads();
+        if (!leads.length) { alert('אין לידים לייצוא'); return; }
+        const headers = ['שם פרטי','שם משפחה','מייל','טלפון','שירות','הודעה','תאריך'];
+        const rows = leads.map(l => [
+          l.firstName, l.lastName, l.email, l.phone,
+          serviceLabels[l.service] || l.service,
+          l.message, new Date(l.date).toLocaleString('he-IL')
+        ].map(v => `"${(v||'').replace(/"/g,'""')}"`).join(','));
+        const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        a.download = `leads_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+      }
+    </script>
+
+  </body>
+</html>
