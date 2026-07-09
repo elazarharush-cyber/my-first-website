@@ -439,22 +439,24 @@
         });
 
         if (allValid) {
-          const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxzDdWwJ8fxyMc2OjoOza83XQgStg1HyzzRVCdwoXiynXKax5ZxN35cdTAVzXteEFc4Lw/exec';
+          const SUPABASE_URL = 'https://dncuhhckzyjlypvqfqjk.supabase.co';
+          const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuY3VoaGNrenlqbHlwdnFmcWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDEzOTcsImV4cCI6MjA5OTE3NzM5N30.GcB3xs8a_-qNGWX_ZzH-oQL-DoIEGaNezJy26wW3O7c';
+          const SHEET_URL   = 'https://script.google.com/macros/s/AKfycbxzDdWwJ8fxyMc2OjoOza83XQgStg1HyzzRVCdwoXiynXKax5ZxN35cdTAVzXteEFc4Lw/exec';
 
           const leadData = {
-            id:        Date.now().toString(),
-            firstName: document.getElementById('firstName').value.trim(),
-            lastName:  document.getElementById('lastName').value.trim(),
-            email:     document.getElementById('email').value.trim(),
-            phone:     document.getElementById('phone').value.trim(),
-            service:   document.getElementById('service').value,
-            message:   document.getElementById('message').value.trim(),
-            date:      new Date().toISOString(),
+            first_name: document.getElementById('firstName').value.trim(),
+            last_name:  document.getElementById('lastName').value.trim(),
+            email:      document.getElementById('email').value.trim(),
+            phone:      document.getElementById('phone').value.trim(),
+            service:    document.getElementById('service').value,
+            message:    document.getElementById('message').value.trim(),
           };
 
-          // Save to localStorage
+          // Save to localStorage (for admin dashboard)
+          const localLead = { ...leadData, id: Date.now().toString(), date: new Date().toISOString(),
+            firstName: leadData.first_name, lastName: leadData.last_name };
           const leads = JSON.parse(localStorage.getItem('leads') || '[]');
-          leads.push(leadData);
+          leads.push(localLead);
           localStorage.setItem('leads', JSON.stringify(leads));
 
           // Update button to loading state
@@ -462,20 +464,32 @@
           btn.textContent = '⏳ שולח...';
           btn.disabled = true;
 
-          // Send to Google Sheets
-          fetch(SHEET_URL, {
+          // Send to Supabase
+          const supabasePromise = fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify(leadData),
+          });
+
+          // Send to Google Sheets (backup)
+          const sheetsPromise = fetch(SHEET_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(leadData),
-          })
-          .then(() => {
-            btn.textContent = '✅ הטופס נשלח בהצלחה! נחזור אליך בקרוב';
-            btn.style.background = 'linear-gradient(135deg, #6edfa0, #2ecc71)';
-          })
-          .catch(() => {
-            // Saved locally even if Sheets failed
-            btn.textContent = '✅ הטופס נשלח! נחזור אליך בקרוב';
+            body: JSON.stringify({ ...leadData, firstName: leadData.first_name, lastName: leadData.last_name, date: new Date().toISOString() }),
+          });
+
+          Promise.allSettled([supabasePromise, sheetsPromise]).then(([supa]) => {
+            if (supa.status === 'fulfilled' && supa.value.ok) {
+              btn.textContent = '✅ הטופס נשלח בהצלחה! נחזור אליך בקרוב';
+            } else {
+              btn.textContent = '✅ הטופס נשלח! נחזור אליך בקרוב';
+            }
             btn.style.background = 'linear-gradient(135deg, #6edfa0, #2ecc71)';
           });
 

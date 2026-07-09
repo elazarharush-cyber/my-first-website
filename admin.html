@@ -343,6 +343,8 @@
     <script>
       const ADMIN_PASS = 'admin123';
       const STORAGE_KEY = 'leads';
+      const SUPABASE_URL = 'https://dncuhhckzyjlypvqfqjk.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuY3VoaGNrenlqbHlwdnFmcWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MDEzOTcsImV4cCI6MjA5OTE3NzM5N30.GcB3xs8a_-qNGWX_ZzH-oQL-DoIEGaNezJy26wW3O7c';
       let sortField = 'date';
       let sortDir = -1; // -1 = desc, 1 = asc
 
@@ -360,8 +362,7 @@
         if (val === ADMIN_PASS) {
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('dashboard').style.display = 'block';
-          renderTable();
-          updateStats();
+          loadDashboard();
         } else {
           document.getElementById('loginError').style.display = 'block';
           document.getElementById('passwordInput').value = '';
@@ -379,28 +380,84 @@
       }
 
       // --- Data ---
+      async function fetchLeadsFromSupabase() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/leads?select=*&order=created_at.desc`, {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+            }
+          });
+          if (!res.ok) throw new Error('Supabase error');
+          const data = await res.json();
+          // Normalize field names to match local format
+          return data.map(l => ({
+            ...l,
+            firstName: l.first_name,
+            lastName:  l.last_name,
+            date:      l.created_at,
+          }));
+        } catch {
+          // Fallback to localStorage
+          return getLocalLeads();
+        }
+      }
+
+      function getLocalLeads() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      }
+
       function getLeads() {
         return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       }
 
-      function deleteLead(id) {
+      async function deleteLead(id) {
         if (!confirm('למחוק ליד זה?')) return;
+        // Delete from Supabase
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/leads?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+            }
+          });
+        } catch {}
+        // Delete from localStorage
         const leads = getLeads().filter(l => l.id !== id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
-        renderTable();
-        updateStats();
+        await loadDashboard();
       }
 
-      function clearAllLeads() {
+      async function clearAllLeads() {
         if (!confirm('למחוק את כל הלידים? פעולה זו אינה הפיכה.')) return;
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/leads?id=neq.00000000-0000-0000-0000-000000000000`, {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+            }
+          });
+        } catch {}
         localStorage.removeItem(STORAGE_KEY);
+        await loadDashboard();
+      }
+
+      // --- Load dashboard (async) ---
+      let allLeads = [];
+
+      async function loadDashboard() {
+        document.getElementById('leadsTableBody').innerHTML =
+          `<tr><td colspan="7" style="text-align:center;padding:40px;color:#5a7a90;">⏳ טוען נתונים...</td></tr>`;
+        allLeads = await fetchLeadsFromSupabase();
+        updateStats(allLeads);
         renderTable();
-        updateStats();
       }
 
       // --- Stats ---
-      function updateStats() {
-        const leads = getLeads();
+      function updateStats(leads) {
+        leads = leads || allLeads;
         const now = new Date();
         const todayStr = now.toDateString();
         const weekAgo = new Date(now - 7 * 864e5);
@@ -426,11 +483,11 @@
         renderTable();
       }
 
-      // --- Render ---
+      // --- Render (uses allLeads cache) ---
       function renderTable() {
         const search = document.getElementById('searchInput').value.toLowerCase();
         const serviceFilter = document.getElementById('serviceFilter').value;
-        let leads = getLeads();
+        let leads = [...allLeads];
 
         // Filter
         leads = leads.filter(l => {
@@ -479,7 +536,7 @@
 
       // --- Export CSV ---
       function exportCSV() {
-        const leads = getLeads();
+        const leads = allLeads;
         if (!leads.length) { alert('אין לידים לייצוא'); return; }
         const headers = ['שם פרטי','שם משפחה','מייל','טלפון','שירות','הודעה','תאריך'];
         const rows = leads.map(l => [
