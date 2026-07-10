@@ -293,6 +293,9 @@
           </div>
         </div>
         <div class="topbar-actions">
+          <span id="lastUpdated" style="color:#5a7a90;font-size:0.78rem;"></span>
+          <button class="btn btn-sm" onclick="loadDashboard()" id="refreshBtn">🔄 רענן</button>
+          <button class="btn btn-sm" onclick="exportCSV()">⬇ ייצוא CSV</button>
           <button class="btn btn-sm" onclick="exportCSV()">⬇ ייצוא CSV</button>
           <button class="btn btn-sm btn-danger" onclick="clearAllLeads()">🗑 נקה הכל</button>
           <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:white;" onclick="logout()">יציאה</button>
@@ -360,9 +363,11 @@
       function doLogin() {
         const val = document.getElementById('passwordInput').value;
         if (val === ADMIN_PASS) {
+          sessionStorage.setItem('adminAuth', 'true');
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('dashboard').style.display = 'block';
           loadDashboard();
+          startAutoRefresh();
         } else {
           document.getElementById('loginError').style.display = 'block';
           document.getElementById('passwordInput').value = '';
@@ -373,7 +378,28 @@
         if (e.key === 'Enter') doLogin();
       });
 
+      // Auto-login if session exists
+      if (sessionStorage.getItem('adminAuth') === 'true') {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadDashboard();
+        startAutoRefresh();
+      }
+
+      // Auto-refresh every 30 seconds
+      function startAutoRefresh() {
+        setInterval(async () => {
+          const newLeads = await fetchLeadsFromSupabase();
+          if (newLeads.length !== allLeads.length) {
+            allLeads = newLeads;
+            updateStats(allLeads);
+            renderTable();
+          }
+        }, 30000);
+      }
+
       function logout() {
+        sessionStorage.removeItem('adminAuth');
         document.getElementById('loginScreen').style.display = 'flex';
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('passwordInput').value = '';
@@ -448,11 +474,17 @@
       let allLeads = [];
 
       async function loadDashboard() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) { refreshBtn.textContent = '⏳'; refreshBtn.disabled = true; }
         document.getElementById('leadsTableBody').innerHTML =
           `<tr><td colspan="7" style="text-align:center;padding:40px;color:#5a7a90;">⏳ טוען נתונים...</td></tr>`;
         allLeads = await fetchLeadsFromSupabase();
         updateStats(allLeads);
         renderTable();
+        const now = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        const el = document.getElementById('lastUpdated');
+        if (el) el.textContent = `עודכן בשעה ${now}`;
+        if (refreshBtn) { refreshBtn.textContent = '🔄 רענן'; refreshBtn.disabled = false; }
       }
 
       // --- Stats ---
